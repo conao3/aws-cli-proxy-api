@@ -50,5 +50,6 @@ phases:
         kubectl set image deployment/cli-proxy-api \
           cli-proxy-api="${ECR_REGISTRY}/${PREFIX}-cli-proxy-api:latest" \
           -n default
+        kubectl rollout restart deployment/cli-proxy-api -n default
         kubectl rollout status deployment/cli-proxy-api -n default --timeout=300s
         rm -f /tmp/cli-proxy-api-secret.json /tmp/cli-proxy-api-config.yaml /tmp/cli-proxy-api-basic-auth-users
