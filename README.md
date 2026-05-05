@@ -23,6 +23,7 @@ The deploy build reads `${PREFIX}-secret` and expects:
 
 - `cli-proxy-api-key`: downstream API key for clients
 - `cli-proxy-api-management-key`: optional management key for localhost/port-forwarded management API or UI
+- `cli-proxy-api-basic-auth-users`: htpasswd-formatted users file content for the public ingress basic authentication proxy
 
 Management remote access is disabled in the rendered config. If `cli-proxy-api-management-key` is empty, `/v0/management/*` stays disabled. Use `kubectl port-forward` plus a management key, or `kubectl exec`, for OAuth and management work.
 

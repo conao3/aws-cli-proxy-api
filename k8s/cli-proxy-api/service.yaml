@@ -9,4 +9,4 @@ spec:
   ports:
   - name: http
     port: 8317
-    targetPort: 8317
+    targetPort: 8080

@@ -38,8 +38,12 @@ phases:
           --query SecretString \
           --output text > /tmp/cli-proxy-api-secret.json
         python3 scripts/render_config.py /tmp/cli-proxy-api-secret.json > /tmp/cli-proxy-api-config.yaml
+        python3 scripts/render_basic_auth.py /tmp/cli-proxy-api-secret.json > /tmp/cli-proxy-api-basic-auth-users
         kubectl create secret generic cli-proxy-api-config \
           --from-file=config.yaml=/tmp/cli-proxy-api-config.yaml \
+          --dry-run=client -o yaml | kubectl apply -f -
+        kubectl create secret generic cli-proxy-api-basic-auth \
+          --from-file=users=/tmp/cli-proxy-api-basic-auth-users \
           --dry-run=client -o yaml | kubectl apply -f -
 
         kubectl apply -k k8s/cli-proxy-api
@@ -47,4 +51,4 @@ phases:
           cli-proxy-api="${ECR_REGISTRY}/${PREFIX}-cli-proxy-api:latest" \
           -n default
         kubectl rollout status deployment/cli-proxy-api -n default --timeout=300s
-        rm -f /tmp/cli-proxy-api-secret.json /tmp/cli-proxy-api-config.yaml
+        rm -f /tmp/cli-proxy-api-secret.json /tmp/cli-proxy-api-config.yaml /tmp/cli-proxy-api-basic-auth-users

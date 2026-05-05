@@ -19,10 +19,35 @@ spec:
       imagePullSecrets:
       - name: ecr-secret
       containers:
+      - name: basic-auth-proxy
+        image: nginx:1.27-alpine
+        ports:
+        - name: http
+          containerPort: 8080
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: default.conf
+          readOnly: true
+        - name: basic-auth
+          mountPath: /etc/nginx/auth
+          readOnly: true
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 30
       - name: cli-proxy-api
         image: 249899228725.dkr.ecr.ap-northeast-1.amazonaws.com/dev-k8s-cli-proxy-api:latest
         ports:
-        - name: http
+        - name: app
           containerPort: 8317
         env:
         - name: TZ
@@ -47,6 +72,12 @@ spec:
           initialDelaySeconds: 15
           periodSeconds: 30
       volumes:
+      - name: nginx-config
+        configMap:
+          name: cli-proxy-api-nginx
+      - name: basic-auth
+        secret:
+          secretName: cli-proxy-api-basic-auth
       - name: config
         secret:
           secretName: cli-proxy-api-config
