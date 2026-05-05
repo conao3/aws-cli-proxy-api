@@ -1,6 +1,20 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  name: cli-proxy-api-config
+  labels:
+    app: cli-proxy-api
+spec:
+  accessModes:
+  - ReadWriteMany
+  storageClassName: efs-sc
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
   name: cli-proxy-api-auths
   labels:
     app: cli-proxy-api

@@ -18,6 +18,25 @@ spec:
     spec:
       imagePullSecrets:
       - name: ecr-secret
+      initContainers:
+      - name: init-config
+        image: busybox:1.37
+        command:
+        - sh
+        - -c
+        - |
+          set -eu
+          if [ ! -s /config/config.yaml ]; then
+            cp /config-template/config.yaml /config/config.yaml
+            chown 50001:50001 /config/config.yaml
+            chmod 600 /config/config.yaml
+          fi
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: config-template
+          mountPath: /config-template
+          readOnly: true
       containers:
       - name: basic-auth-proxy
         image: nginx:1.27-alpine
@@ -56,7 +75,6 @@ spec:
         - name: config
           mountPath: /CLIProxyAPI/config.yaml
           subPath: config.yaml
-          readOnly: true
         - name: auths
           mountPath: /root/.cli-proxy-api
         - name: logs
@@ -79,6 +97,9 @@ spec:
         secret:
           secretName: cli-proxy-api-basic-auth
       - name: config
+        persistentVolumeClaim:
+          claimName: cli-proxy-api-config
+      - name: config-template
         secret:
           secretName: cli-proxy-api-config
       - name: auths
