@@ -1,9 +1,24 @@
 #!/usr/bin/env python3
 import json
 import os
+import sys
 
-api_key = os.environ["CLI_PROXY_API_KEY"]
-management_key = os.environ.get("CLI_PROXY_MANAGEMENT_KEY", "")
+
+def load_config():
+    if len(sys.argv) > 1:
+        with open(sys.argv[1], "r", encoding="utf-8") as fh:
+            payload = json.load(fh)
+        return (
+            payload["cli-proxy-api-key"],
+            payload.get("cli-proxy-api-management-key", ""),
+        )
+    return (
+        os.environ["CLI_PROXY_API_KEY"],
+        os.environ.get("CLI_PROXY_MANAGEMENT_KEY", ""),
+    )
+
+
+api_key, management_key = load_config()
 
 print(f'''host: ""
 port: 8317

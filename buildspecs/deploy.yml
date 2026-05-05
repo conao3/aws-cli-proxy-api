@@ -25,21 +25,19 @@ phases:
     commands:
       - |
         set -euxo pipefail -o posix
-        ECR_TOKEN=$(aws ecr get-login-password --region ap-northeast-1)
+        mkdir -p ~/.docker
+        aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin "${ECR_REGISTRY}"
         kubectl delete secret ecr-secret -n default --ignore-not-found
-        kubectl create secret docker-registry ecr-secret \
-          --docker-server="${ECR_REGISTRY}" \
-          --docker-username=AWS \
-          --docker-password="${ECR_TOKEN}" \
+        kubectl create secret generic ecr-secret \
+          --from-file=.dockerconfigjson="${HOME}/.docker/config.json" \
+          --type=kubernetes.io/dockerconfigjson \
           -n default
 
-        SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id "${PREFIX}-secret" --query SecretString --output text)
-        CLI_PROXY_API_KEY=$(SECRET_JSON="${SECRET_JSON}" python3 -c 'import json, os; print(json.loads(os.environ["SECRET_JSON"])["cli-proxy-api-key"])')
-        CLI_PROXY_MANAGEMENT_KEY=$(SECRET_JSON="${SECRET_JSON}" python3 -c 'import json, os; print(json.loads(os.environ["SECRET_JSON"]).get("cli-proxy-api-management-key", ""))')
-
-        CLI_PROXY_API_KEY="${CLI_PROXY_API_KEY}" \
-        CLI_PROXY_MANAGEMENT_KEY="${CLI_PROXY_MANAGEMENT_KEY}" \
-          python3 scripts/render_config.py > /tmp/cli-proxy-api-config.yaml
+        aws secretsmanager get-secret-value \
+          --secret-id "${PREFIX}-secret" \
+          --query SecretString \
+          --output text > /tmp/cli-proxy-api-secret.json
+        python3 scripts/render_config.py /tmp/cli-proxy-api-secret.json > /tmp/cli-proxy-api-config.yaml
         kubectl create secret generic cli-proxy-api-config \
           --from-file=config.yaml=/tmp/cli-proxy-api-config.yaml \
           --dry-run=client -o yaml | kubectl apply -f -
@@ -49,3 +47,4 @@ phases:
           cli-proxy-api="${ECR_REGISTRY}/${PREFIX}-cli-proxy-api:latest" \
           -n default
         kubectl rollout status deployment/cli-proxy-api -n default --timeout=300s
+        rm -f /tmp/cli-proxy-api-secret.json /tmp/cli-proxy-api-config.yaml
