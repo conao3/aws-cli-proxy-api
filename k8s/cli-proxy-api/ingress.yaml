@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cli-proxy-api
+  annotations:
+    traefik.ingress.kubernetes.io/router.priority: "200"
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: dev-cli-proxy-api.sancode.dev
+    http:
+      paths:
+      - path: /v1
+        pathType: Prefix
+        backend:
+          service:
+            name: cli-proxy-api
+            port:
+              number: 8317
+      - path: /api/provider
+        pathType: Prefix
+        backend:
+          service:
+            name: cli-proxy-api
+            port:
+              number: 8317
