@@ -9,8 +9,8 @@ This repository does not vendor CLIProxyAPI source code. It wraps the upstream D
 - Upstream image: `eceasy/cli-proxy-api:latest`
 - Internal port: `8317`
 - Public ingress paths:
-  - `/v1`
-  - `/api/provider`
+  - `/v1` protected by CLIProxyAPI Bearer API keys
+  - `/api/provider` protected by HTTP basic authentication before proxying to CLIProxyAPI
 - Host: `dev-cli-proxy-api.sancode.dev`
 - Auth/config/log persistence:
   - config: Kubernetes Secret `cli-proxy-api-config`
