@@ -15,6 +15,11 @@ data:
         return 200 "ok\n";
       }
 
+      location = / {
+        default_type text/plain;
+        return 200 "CLIProxyAPI is running.\n\nOpenAI-compatible API endpoint: http://localhost:8317/v1\nHealth check: http://localhost:8317/healthz\nManagement Center: http://localhost:8788/\n";
+      }
+
       location /v1 {
         proxy_http_version 1.1;
         proxy_set_header Host $host;
