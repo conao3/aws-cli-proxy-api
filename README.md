@@ -11,7 +11,9 @@ This repository does not vendor CLIProxyAPI source code. It wraps the upstream D
 - Public ingress paths:
   - `/v1` protected by CLIProxyAPI Bearer API keys
   - `/api/provider` protected by HTTP basic authentication before proxying to CLIProxyAPI
-- Host: `dev-cli-proxy-api.sancode.dev`
+- Host:
+  - dev: `dev-cli-proxy-api.sancode.dev`
+  - prd: `cli-proxy-api.sancode.dev`
 - Auth/config/log persistence:
   - config: EFS PVC `cli-proxy-api-config` mounted at `/CLIProxyAPI/config.yaml`
   - config template: Kubernetes Secret `cli-proxy-api-config`, copied into the config PVC only when the PVC has no `config.yaml`
@@ -34,7 +36,7 @@ The `aws-infra-k8s` stack creates CodeBuild projects and Step Functions for this
 
 - build: builds the wrapper image and pushes `${PREFIX}-cli-proxy-api:latest`
 - deploy: renders the initial config template from Secrets Manager, applies `k8s/cli-proxy-api`, updates the deployment image, and waits for rollout
-- the default build base image is `${ECR_REGISTRY}/${PREFIX}-cli-proxy-api:upstream`, so bootstrap that tag once from a machine that can pull `eceasy/cli-proxy-api:latest`
+- the default build base image is `eceasy/cli-proxy-api:latest`, so CodeBuild can populate an empty environment without local ECR pushes
 
 Before the first CodeBuild run, push this repository to the GitHub location referenced by `aws-infra-k8s`: `https://github.com/conao3/aws-cli-proxy-api.git`.
 

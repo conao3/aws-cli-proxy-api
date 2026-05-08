@@ -46,7 +46,19 @@ phases:
           --from-file=users=/tmp/cli-proxy-api-basic-auth-users \
           --dry-run=client -o yaml | kubectl apply -f -
 
-        kubectl apply -k k8s/cli-proxy-api
+        cp -R k8s/cli-proxy-api /tmp/cli-proxy-api-k8s
+        ENV_NAME="${ENV_NAME:-${PREFIX%%-*}}"
+        if [[ "${ENV_NAME}" == "prd" ]]; then
+          CLI_PROXY_API_HOST="cli-proxy-api.sancode.dev"
+        else
+          CLI_PROXY_API_HOST="${ENV_NAME}-cli-proxy-api.sancode.dev"
+        fi
+        sed -i \
+          -e "s|dev-cli-proxy-api.sancode.dev|${CLI_PROXY_API_HOST}|g" \
+          -e "s|249899228725.dkr.ecr.ap-northeast-1.amazonaws.com/dev-k8s-cli-proxy-api:latest|${ECR_REGISTRY}/${PREFIX}-cli-proxy-api:latest|g" \
+          /tmp/cli-proxy-api-k8s/*.yaml
+
+        kubectl apply -k /tmp/cli-proxy-api-k8s
         kubectl set image deployment/cli-proxy-api \
           cli-proxy-api="${ECR_REGISTRY}/${PREFIX}-cli-proxy-api:latest" \
           -n default

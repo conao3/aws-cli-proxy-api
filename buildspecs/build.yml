@@ -17,7 +17,7 @@ phases:
       - |
         set -euxo pipefail -o posix
         docker build \
-          --build-arg CLI_PROXY_API_IMAGE="${CLI_PROXY_API_IMAGE:-$ECR_REGISTRY/${PREFIX}-cli-proxy-api:upstream}" \
+          --build-arg CLI_PROXY_API_IMAGE="${CLI_PROXY_API_IMAGE:-eceasy/cli-proxy-api:latest}" \
           -t cli-proxy-api:latest .
         docker tag cli-proxy-api:latest "$ECR_REGISTRY/${PREFIX}-cli-proxy-api:latest"
         docker push "$ECR_REGISTRY/${PREFIX}-cli-proxy-api:latest"
