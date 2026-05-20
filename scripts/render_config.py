@@ -49,4 +49,9 @@ proxy-url: ""
 request-retry: 3
 max-retry-interval: 30
 ws-auth: true
+
+routing:
+  strategy: "round-robin"
+  session-affinity: true
+  session-affinity-ttl: "1h"
 ''')
